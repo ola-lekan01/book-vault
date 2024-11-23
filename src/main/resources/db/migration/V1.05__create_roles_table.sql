@@ -1,0 +1,8 @@
+CREATE TABLE IF NOT EXISTS roles
+(
+    id   UUID PRIMARY KEY,
+    name VARCHAR(50) NOT NULL UNIQUE,
+    del_flag     BOOLEAN      NOT NULL DEFAULT FALSE,
+    date_created TIMESTAMP    NOT NULL DEFAULT NOW(),
+    date_updated TIMESTAMP    NOT NULL DEFAULT NOW()
+);
