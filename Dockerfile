@@ -1,4 +1,4 @@
-FROM openjdk:21-jdk-slim
+FROM openjdk:17-jdk-slim
 COPY target/*.jar /app.jar
-EXPOSE 8080
+EXPOSE 9000
 ENTRYPOINT ["java", "-jar", "/app.jar"]
