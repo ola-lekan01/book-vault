@@ -1,0 +1,44 @@
+services:
+  postgres:
+    image: 'postgres:latest'
+    container_name: postgres_container
+    ports:
+      - '5400:5432'
+    restart: always
+    deploy:
+      mode: replicated
+      replicas: 1
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password123
+      POSTGRES_DB: wearecheck_transaction_service_db
+    volumes:
+      - ../db_data/postgres:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U postgres']
+      interval: 5s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+  transaction-service:
+    image: 'wearecheck_transaction_service:0.0.1'
+    container_name: wearecheck-transaction-service
+    ports:
+      - '9000:8080'
+    healthcheck:
+      test: timeout 10s bash -c ':>/dev/tcp/localhost/9000' ||exit 1
+      interval: 5s
+      timeout: 5s
+      retries: 20
+      start_period: 5s
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+      SPRING_APPLICATION_NAME: transaction-service
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/wearecheck_transaction_service_db
+      SPRING_DATASOURCE_PASSWORD: password123
+      SPRING_DATASOURCE_USERNAME: postgres
+      OTEL_SERVICE_NAME: transaction-service
+    depends_on:
+      postgres:
+        condition: service_healthy
